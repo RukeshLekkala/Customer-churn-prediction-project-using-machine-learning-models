@@ -1,0 +1,362 @@
+@Customer churn prediction models applied to retail datasets.
+
+import pandas as pd # importing pandas for data analysis. 
+
+import numpy as np # importing numpy for interpreting the arraylist of datasets.
+
+import matplotlib as plt # importing matploib for data visiualization.
+
+import seaborn as sns # visual interpretion of the datasets.
+
+df = pd.DataFrame # dummy variable for storing the datasets.
+
+churn_data = pd.read_csv("retaildataset1.csv") # loading the churn_datasets in python jupyter notebook. 
+
+len(churn_data) # finding the length of the churn_datasets.
+
+churn_data.head() # printing the first five rows of the churn_datasets. 
+
+churn_data.shape # Display the shape of the dataset.
+
+churn_data.head(10) # Displays top 10 dataset.
+
+sns.scatterplot(churn_data['Price_Code'], churn_data['Repitition_Code'],  hue = churn_data['Target']) # plotting the scatter chart.
+
+sns.scatterplot(churn_data['Date_Code'], churn_data['Country_Code'],  hue = churn_data['Target'])
+
+# plotting the scatter plot date and country code.
+
+import seaborn as sns
+
+%matplotlib inline
+
+sns.pairplot(churn_data, palette='coolwarm') # plotting the pair plot on retail dataset.
+
+@Data Preprocessing.
+
+print(churn_data.isna().sum()) # For identifying the null values in churn_datasets.
+
+cd1 = churn_data.dropna(axis = 0) # droping the NAN values because don't want to replace the nan values with repeated values.
+
+len(cd1) # finding the length of datasets after removing nan values.
+
+churn_data.info()
+
+cd1.isna().sum()
+
+#cd1.to_csv('retail_datasets.csv')
+
+cd1.isna().sum()
+
+churn_data.keys
+
+@Principal component analysis for dimensionality reduction.
+
+from sklearn.preprocessing import StandardScaler  
+
+from sklearn.decomposition import PCA
+
+import numpy as np
+
+import pandas as pd
+
+Input = churn_data[['Price_Code', 'Date_Code', 'Repitition_Code', 'Country_Code']]
+
+stdscale = StandardScaler()
+
+stdscale.fit(Input)
+
+stdscale_data = stdscale.transform(Input)
+
+pca = PCA(n_components = 4)
+
+pca.fit(stdscale_data)
+
+Input_pca= pca.transform(stdscale_data)
+
+stdscale_data.shape
+
+Input.shape
+
+Input_variables = [['Price_Code', 'Date_Code', 'Repitition_Code', 'Country_Code']]
+
+Dataf_component = pd.DataFrame(pca.components_,columns = Input_variables)  
+
+sns.heatmap(Dataf_component, cmap = 'plasma')
+
+Dataf_component.head()
+
+
+@Logistice regression
+
+import pandas as pd # Used for the Data manupulation & Data Analysis.
+
+import numpy as np # Used for creating the array of list.
+
+from sklearn import preprocessing # for remove & finding corrupted data in datasets.
+
+import matplotlib.pyplot as plt # for ploting the graphs. 
+
+from sklearn.linear_model import LogisticRegression # for importing the logistic regression model.
+
+from sklearn.model_selection import train_test_split # for spliting the dataset into train and test dataset. 
+
+import seaborn as sns # for ploting the grapgh.
+
+from sklearn import metrics
+
+from sklearn.model_selection import cross_val_score
+
+from sklearn.metrics import classification_report, confusion_matrix
+
+sns.set(style="white") # for displaying the colour. 
+
+sns.set(style="whitegrid", color_codes=True) # for displaying the colour in grid way.
+
+plt.rc("font", size=14) # for displaying the font size in graph.
+
+seed = 1  # defining the inputs into 'x' variable.
+
+Inputx = Input_pca
+
+Inputy = churn_data['Target'] # defining the target value(Type) into 'y' variable.
+
+x_train, x_test, y_train, y_test = train_test_split(Inputx, Inputy, test_size = 0.3, random_state = seed) # dividing the dataset 80% into train and 20% into test datasets.  
+
+logit_model = LogisticRegression() # predicting the logistic regression model for train
+
+logit_model.fit(x_train, y_train)
+
+y_predict1 = logit_model.predict(x_test)
+
+print('predicted churn/Yes or No \n\n', y_predict1)
+
+len(y_predict1)
+
+column_label = list(Input_variables) # To label all the coefficient
+
+model_Coeff = pd.DataFrame(logit_model.coef_, columns = column_label)
+
+model_Coeff['intercept'] = logit_model.intercept_
+
+print("Coefficient alues of the surface are:  \n\n ", model_Coeff )
+
+logmodel_score = logit_model.score(x_test, y_test)
+
+print('The accuracy of churn model using testing set: \n\n', logmodel_score)
+
+print(metrics.confusion_matrix(y_test, y_predict1))
+
+print(classification_report(y_test, y_predict1))
+
+cross_valid = cross_val_score(logit_model, Inputx, Inputy, cv = 10)
+
+cross_valid
+
+cross_valid.mean()
+
+@Support vector machines
+
+#Implementing the Support Vector Machines#
+
+import pandas as pd
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score 
+
+from sklearn.model_selection import GridSearchCV
+
+from sklearn import svm
+
+from sklearn import datasets
+
+%matplotlib inline  
+ 
+Inputx = Input_pca
+
+Inputy = churn_data['Target']
+
+x_train, x_test, y_train, y_test = train_test_split(Inputx, Inputy, test_size = 0.3, random_state = 52)
+
+svm_model = svm.SVC(kernel ='rbf', C = 30, gamma = 'auto')
+
+svm_model.fit(x_train, y_train)
+
+y_predict = svm_model.predict(x_test)
+
+print(confusion_matrix(y_test, y_predict))
+
+print('\n')
+
+print(classification_report(y_test, y_predict))
+
+print(accuracy_score(y_test, y_predict))
+
+@Grid searchCV
+
+# Finding Best paramters using GridSearch(c, g)
+
+from sklearn.model_selection import GridSearchCV
+
+grid = GridSearchCV(svm.SVC(gamma = 'auto'), {
+    'C': [1, 3, 5],
+    'kernel': ['rbf','linear']
+}, cv = 5, return_train_score=False, verbose = 4)
+
+grid.fit(x_train, y_train)
+
+predictions = grid.predict(x_test)
+
+print(confusion_matrix(y_test, predictions))
+
+print('\n')
+
+print(classification_report(y_test, predictions))
+
+grid.best_params_
+
+grid.best_estimator_
+
+print(accuracy_score(y_test, y_predict))
+
+@Multi-Layered Perceptron
+
+# Multi_Layered perceptron algorithms
+
+import pandas as pd # importing pandas for data analysis of churn_datasets.
+
+import numpy as np # importing numpy to create array list of churn_datasets.
+
+import seaborn as sns # sns for ploting the heat map. 
+
+import matplotlib.pyplot as plt 
+
+import tensorflow.keras
+
+from keras.models import Sequential
+
+from keras.layers import Dense
+
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+from sklearn.preprocessing import MinMaxScaler
+
+from sklearn.model_selection import train_test_split
+
+# Defing the input and output variables and spliting the dataset.
+
+Inputx = churn_data[['Price_Code', 'Date_Code', 'Repitition_Code', 'Country_Code']]
+
+Inputy = churn_data['Target']
+
+x_train, x_test, y_train, y_test = train_test_split(Inputx, Inputy, test_size = 0.25, random_state = 1) 
+
+sns.scatterplot(churn_data['Price_Code'], churn_data['Date_Code'],  hue = churn_data['Target'])
+
+# Normalisation of the train dataset
+
+mlp_scalar = MinMaxScaler()
+
+mlp_scalar.fit(x_train)
+
+xtrain_scaled = mlp_scalar.transform(x_train)
+
+# Normalisation of the test dataset 
+
+mlp_scalar = MinMaxScaler()
+
+mlp_scalar.fit(x_test)
+
+xtest_scaled = mlp_scalar.transform(x_test)
+
+# Building the MLP model.
+
+mlp_model =Sequential()
+
+mlp_model.add(Dense(20, input_dim = 4, activation = 'tanh'))
+
+mlp_model.add(Dense(20, activation = 'relu'))
+
+mlp_model.add(Dense(1, activation = 'sigmoid'))
+
+mlp_model.compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
+
+mlp_model.fit(xtrain_scaled, y_train, batch_size = 5, epochs = 50, verbose = 2)
+
+# summary of the results.
+
+mlp_model.summary()
+
+# classification and heat map of results.
+
+from sklearn.metrics import accuracy_score
+
+y_predict = mlp_model.predict_classes(xtest_scaled)
+
+dframe = confusion_matrix(y_test, y_predict)     
+
+sns.heatmap(dframe, annot =True, fmt = 'd')
+
+print(classification_report(y_test, y_predict))
+
+print(accuracy_score(y_test, y_predict))
+
+# weights used in constructing the mlp model.
+
+weights, bias = mlp_model.layers[0].get_weights() 
+weights  
+
+@Naive Bayes
+
+import numpy as np    # to create array list
+
+import pandas as pd  # data analysis 
+
+import matplotlib.pyplot as plt # data visualization
+
+import seaborn as sns  # the library used for exploratory data analysis
+
+from sklearn.model_selection import cross_val_score
+
+from sklearn.model_selection import train_test_split  # spliting the datasets into train and test dataset
+
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score # to disply the confusion matrix and detailed output report
+
+from sklearn.naive_bayes import GaussianNB # importing the svm model from sklearn 
+
+from sklearn import datasets  # oading the dataset from sklearn
+
+%matplotlib inline  
+
+Inputx = Input_pca
+
+Inputy = churn_data['Target'] # Output/target feature
+
+x_train, x_test, y_train, y_test = train_test_split(Inputx, Inputy, test_size=0.3)  # Spliting the dataset into train(70 %) and test(30 %) 
+
+naive_model = GaussianNB() # Naive_base model from 
+
+nbayes_model = naive_model.fit(x_train, y_train)
+
+predictions = nbayes_model.predict(x_test)
+
+print(confusion_matrix(y_test, predictions))
+
+print(classification_report(y_test, predictions))
+
+print(accuracy_score(y_test, predictions))
+
+cross_valid = cross_val_score(naive_model, Inputx, Inputy, cv = 10)
+
+cross_valid
+
+cross_valid.mean()
+
+y_test.value_counts() # counts traget classification.
